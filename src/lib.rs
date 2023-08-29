@@ -5,23 +5,14 @@
     zero copy      ::::: https://github.com/wildonion/uniXerr/blob/a30a9f02b02ec7980e03eb8e31049890930d9238/infra/valhalla/coiniXerr/src/schemas.rs#L1621C6-L1621C6
     data collision ::::: https://github.com/wildonion/uniXerr/blob/a30a9f02b02ec7980e03eb8e31049890930d9238/infra/valhalla/coiniXerr/src/utils.rs#L640 
     https://crates.io/crates/pyo3
+    https://github.com/wildonion/cs-concepts
+    https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
 
-    decompiling using ghidra
+    decompiling using ghidra, binding using .so
     hardware coding with ram concepts like memory layout and offset (static and const are in segment data and let is on the stack)
     lle (hex editor, bytes, seeds, xor, nor, &, |, include!, liefetime, 
         generic, bytes, hex, base64, raw parts, &mut pointer, unpin, pin
         and box methods, phantomdata) 
-    ransomewere, steganography and files encryption
-
-    
-    encrypting using aes256 cbc with pbkdf2 and salt then showing key and iv
-                 
-    openssl aes-256-cbc -a -salt -pbkdf2 -in secrets.txt -out secrets.txt.enc -p
-    openssl aes-256-cbc -d -a -pbkdf2 -in secrets.txt.enc -out secrets.txt.new -p 
-
-    gpg --output encrypted.data --symmetric --cipher-algo AES256 un_encrypted.data
-    gpg --output un_encrypted.data --decrypt encrypted.data
-    
 
 */
 
@@ -64,7 +55,6 @@ pub mod utils{
         also here it's ok to return the reference from function since our reference lifetime 
         is static and is valid for the entire life of the app
     */
-    // TODO - Box and Pin methods
     pub fn string_to_static_str(s: String) -> &'static str { 
         /* 
             leaking the memory of the heap data String which allows us to have an 
