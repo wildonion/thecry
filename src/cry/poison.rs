@@ -66,24 +66,76 @@ pub mod wannacry{
 
     /* 
 
-        ransomewere, steganography and files encryption
-        
-        encrypting using aes256 cbc with pbkdf2 and salt then showing key and iv
+        ransomewere, steganography and files encryption by encrypting using 
+        aes256 cbc with pbkdf2 + sha384 + salt then showing key and iv like:
                     
-        openssl aes-256-cbc -a -salt -pbkdf2 -in secrets.txt -out secrets.txt.enc -p
-        openssl aes-256-cbc -d -a -pbkdf2 -in secrets.txt.enc -out secrets.txt.new -p 
+            openssl aes-256-cbc -a -salt -pbkdf2 -in secrets.txt -out secrets.txt.enc -p
+            openssl aes-256-cbc -d -a -pbkdf2 -in secrets.txt.enc -out secrets.txt.new -p 
 
-        gpg --output encrypted.data --symmetric --cipher-algo AES256 un_encrypted.data
-        gpg --output un_encrypted.data --decrypt encrypted.data
+            openssl aes-256-cbc -md sha384 -in secret.txt -out secrets.txt.enc -p
+            openssl aes-256-cbc -d -nopad -md sha384 -in secrets.txt.enc -p
+
+            gpg --output encrypted.data --symmetric --cipher-algo AES256 un_encrypted.data
+            gpg --output un_encrypted.data --decrypt encrypted.data
     
     */
 }
 
 
-pub mod decryptaes256{
+pub mod aespaddingattack{
 
+
+    use std::collections::HashMap;
 
     pub use super::*;
+    pub const ITERS: usize = 1000;
+    pub const BLOCKSIZE: usize = 16;
+
+
+    fn check_padding(decrypted_cipher_hex: &str) -> bool{
+
+        /* 
+            PKCS#7 is a common padding scheme where the value of each padding 
+            byte is the number of padding bytes. So, if you're one byte short, 
+            you add 0x01. if you're two bytes short, you add 0x02, 0x02, and so on.
+        */
+        let dec_cipher = decrypted_cipher_hex.replace(" ", "");
+        let bytes = hex::decode(dec_cipher).unwrap();
+
+        /* 
+            slicing needs to borrow the vector since [u8] 
+            doesn't have fixed size at compiletime 
+        */
+        let block = &bytes[0..BLOCKSIZE]; /* every block has 16 bytes length */
+        
+        let mut map = HashMap::<u8, u8>::new();
+        for bidx in 0..block.len(){
+            if bidx == 0{
+                continue;
+            }
+            
+
+            map.entry(block[bidx])
+                .and_modify(|c| *c+=1)
+                .or_insert(1);
+
+        }
+
+       for (k, v) in map{
+            
+            if k == v{
+                let last_v_bytes = &block[BLOCKSIZE-v as usize..BLOCKSIZE];
+                if last_v_bytes.iter().all(|x| x == &v){
+                    return true
+                }
+            } else{
+                return false;
+            }
+       }
+
+        false
+
+    }
 
     fn gen_pswd() -> String{
 
@@ -98,6 +150,7 @@ pub mod decryptaes256{
 
     fn gen_kdf(password: &str) -> Vec<u8>{
 
+        // echo -n '03261985' | sha384sum
 
         let mut hasher = sha2::Sha384::new();
         hasher.update(password);
@@ -109,12 +162,6 @@ pub mod decryptaes256{
 
     pub fn thecry(){
         
-        println!("current dir {}", std::env::current_dir().unwrap().display());
-        let mut enc_file = std::fs::File::open("sec.json").unwrap();
-        let mut buffer = Vec::new();
-        let vector_length = enc_file.read_to_end(&mut buffer).unwrap();
-
-
         // --------------------------------------------------------------------------------
         // https://crypto.stackexchange.com/questions/72658/how-do-i-detect-a-failed-aes-256-decryption-programmatically/79948#79948
         /*  
@@ -123,57 +170,140 @@ pub mod decryptaes256{
             and the ciphertext for the previous block is 3b2364d1d04a35c8081bbc6fdeacbd86. 
             this is equivalent to decrypting one block of ciphertext 5307f7afffa3798f386e7c6c144c6a9c, 
             using an iv of 3b2364d1d04a35c8081bbc6fdeacbd86, also aes requires the length 
-            of each cipherblock to be 16 bytes
+            of each cipherblock to be 16 bytes also decrypting the first block requires the 
+            iv since the plaintext of the first cipherblock is XORed with the iv 
         */
-        
+
+        println!("current dir {}", std::env::current_dir().unwrap().display());
+        let mut enc_file = std::fs::File::open("src/cry/sec.json").unwrap();
+        let mut buffer = Vec::new();
+        let vector_length = enc_file.read_to_end(&mut buffer).unwrap();
+
         /* this is initialization vector that is going to be used as the iv */
-        let block_cipher_1_as_iv = &buffer[0..16];
+        let block_cipher_1_as_iv = &buffer[16..32];
         
         /* this is the cipherblock that is going to be used to decrypt */
-        let first_block_cipher = &buffer[16..32];
+        let first_block_cipher = &buffer[32..48];
 
         /* converting each cipherblock into hex string */
         let hex_first_block_cipher = hex::encode(first_block_cipher);
         let hex_block_cipher_1_as_iv = hex::encode(block_cipher_1_as_iv);
         // --------------------------------------------------------------------------------
 
-        let mut log = std::fs::File::create("decrypt.log").unwrap();
-        let mut used_passwd = Vec::new();
-        for i in 0..1000{
+        let mut log = std::fs::File::create("src/cry/decrypt.log").unwrap();
+        let mut passwords = (0..ITERS)
+            .map(|_|{
+                let pass = gen_pswd();
+                pass
+            })
+            .collect::<Vec<String>>();
 
-            let pass = gen_pswd();
-            let secret = gen_kdf(pass.as_str());
-            
-            if used_passwd.contains(&pass){
-                continue;
-            }
-            used_passwd.push(pass.clone());
+        passwords.push("RemSummer2023".to_string());
 
-            /* we can use the first 32 bytes as the key and the rest as the iv */
+        for idx_pass in 0..ITERS + 1{ /* since the 1000 th element contains the last password */
+
+            let pass = &passwords[idx_pass];
+            let secret = gen_kdf(pass);
+
+            /* we can use the first 32 bytes as the key and the rest as the iv which is 16 bytes */
             let key = &secret.as_slice()[..32];
             let iv = &secret.as_slice()[32..];
-
             let hex_key = hex::encode(key);
             let hex_iv = hex::encode(iv);
 
-            /* creating a 32 bytes iv from the iv using try_from() method */
-            let new_iv = <[u8; 32]>::try_from(iv).unwrap();
+            /* ------------------------------------------------------------- */
+            /* ------------------- ORACLE PADDING ATTACK ------------------- */
+            /* ------------------------------------------------------------- */
+            /* 
 
-            /* decrypting process */
-            let shell_command = Command::new("./decry.sh")
-                .arg(hex_first_block_cipher.as_str())
-                .arg(hex_block_cipher_1_as_iv.as_str())
-                .arg(hex_key)
-                .output()
-                .unwrap();
+                decrypting process using ghidra
+                    goal: find the key??
+                    goal: find the iv??
+                    goal: find kdf??
+                    goal: find salt??
 
-            if shell_command.status.success(){
-                let output_str = std::str::from_utf8(&shell_command.stdout).unwrap();
-                let decrypted_cipher = &output_str[10..];
-                println!("❌ cipherblock [{hex_first_block_cipher:}] | key [{pass:}] | iv [{hex_block_cipher_1_as_iv:}] : {decrypted_cipher:}");
-                let content = format!("❌ cipherblock [{hex_first_block_cipher:}] | key [{pass:}] | iv [{hex_block_cipher_1_as_iv:}] : {decrypted_cipher:}");
-                log.write(content.as_bytes()).unwrap();
-                // println!("✅ valid padding {}", output_str);
+                if we want to mutate an slice we have to make sure that its 
+                underlying data is a mutable pointer like &mut [u8] or &mut Vec<u8>
+                cause slices are behind pointer by default thus to mutate them 
+                we must have a mutable pointer to them
+            */
+
+            let c1_hex = String::from("b7dbc950533d55faab8cf88561600cb3");
+            let mut c1_bytes_vec = hex::decode(c1_hex.clone()).unwrap();
+            let c1_bytes = c1_bytes_vec.as_mut_slice(); /* creating a longer lifetime by converting the vector into mutable slice */
+            
+            let c1_chars = &mut constants::gen_random_chars((BLOCKSIZE-2) as u32); /* 0 up to 14th bytes are random */
+            let c1_bytes = unsafe{ c1_chars.as_bytes_mut() }; /* accessing mutable bytes of string is unsafe */
+            let c1_random_hex = hex::encode(&c1_bytes);
+
+            let hex_key = hex_key.clone();
+            let mut pbyte = 0x00;
+            c1_bytes[BLOCKSIZE-1] = pbyte; /* setting the 15th index to 0x00 */
+            let pblocks = &mut [0u8; 16]; /* pblocks is a mutable pointer to its underlying data which is [0u8; 16] */
+            
+            /* this is a cipherblock inside the encrypted file */
+            let c2_hex = String::from("5814cbbccd968e0d2a72baf30bb06c70");
+            let c2_bytes = hex::decode(&c2_hex).unwrap();
+            
+            for bidx in (BLOCKSIZE-1..0).rev(){    
+
+                /* decrypt C2 and xor it with the iv */
+
+                let shell_command = Command::new("./decry.sh")
+                    .current_dir("src/cry")
+                    .arg(c2_hex.as_str())
+                    .arg(c1_hex.clone())
+                    .arg(hex_key.clone())
+                    .output()
+                    .unwrap();
+
+                if shell_command.status.success(){
+                
+                    let output_str = std::str::from_utf8(&shell_command.stdout).unwrap();
+                    let decrypted_cipher = &output_str[10..49];
+                    
+                    let mut content = String::from("");
+                    let is_correct_padding = check_padding(decrypted_cipher);
+                    if is_correct_padding{
+
+                        println!("✅ cipherblock [{hex_first_block_cipher:}] | key [{pass:}] | iv [{c1_hex:}] | dec => {decrypted_cipher:}");
+                        content = format!("✅ cipherblock [{hex_first_block_cipher:}] | key [{pass:}] | iv [{c1_hex:}] | dec => {decrypted_cipher:}");
+
+                        /* 
+                            since we change the last byte of the C1' to be 0x00 thus if 
+                            the padding is valid means that the last byte of the pblocks 
+                            must be 0x01 because the last byte of plaintext is
+                            padded correctly and since it's only 1 byte we set the last byte
+                            of plaintext to 0x01
+                        */
+
+                        pblocks[bidx] = c1_bytes[bidx] ^ (BLOCKSIZE - bidx) as u8;
+
+                        /* set (bidx-2) bytes of the c1 cipherblock to be random bytes */
+                        let c1_chars = &mut constants::gen_random_chars((bidx-2) as u32);
+                        let new_c1_bytes = unsafe{ c1_chars.as_bytes_mut() };
+                        c1_bytes[0..bidx-2].copy_from_slice(&new_c1_bytes);
+                        
+                        /* and set the bidx-1 to be the 0x00 */
+                        pbyte = 0x00;
+                        c1_bytes[bidx-1] = pbyte;
+
+                    } else{
+                        
+                        println!("❌ cipherblock [{hex_first_block_cipher:}] | key [{pass:}] | iv [{c1_hex:}] | dec => {decrypted_cipher:}");
+                        content = format!("❌ cipherblock [{hex_first_block_cipher:}] | key [{pass:}] | iv [{c1_hex:}] | dec => {decrypted_cipher:}");
+                    
+                        /* add 1 byte to last byte of the c1 cipherblock until we hit the jackpot! */
+                        pbyte += 1;
+                        c1_bytes[bidx] = pbyte;
+
+                    }
+                    
+                    /* logging */
+                    log.write(content.as_bytes()).unwrap();
+
+                }
+
             }
 
         }

@@ -1,5 +1,5 @@
 
-## 💣 Usage
+## 🎯 Run
 
 ```bash
 cargo run --bin thecry
@@ -54,8 +54,8 @@ To verify whether you've used the correct key for decryption, you decrypt the la
 
 > more on [Padding Oracle Attack](https://robertheaton.com/2013/07/29/padding-oracle-attack/)
 
-In our `exam.json` file example, we would select two cipher blocks inside the json file using a hex editor, like `5307f7afffa3798f386e7c6c144c6a9c` and its next block like `3b2364d1d04a35c8081bbc6fdeacbd86` to decrypt the second one using the second-to-last block as the `IV` which `5307f7afffa3798f386e7c6c144c6a9c`. If the resulting plaintext block has a valid **PKCS#7** padding, then the key is correct. This check works because if the wrong key or IV is used for decryption, the resulting plaintext is highly unlikely to have valid **PKCS#7** padding.
+In our `sec.json` file example, we would select two cipher blocks inside the json file using a hex editor, like `5307f7afffa3798f386e7c6c144c6a9c` and its next block like `3b2364d1d04a35c8081bbc6fdeacbd86` to decrypt the second one using the second-to-last block as the `IV` which `5307f7afffa3798f386e7c6c144c6a9c`. If the resulting plaintext block has a valid **PKCS#7** padding, then the key is correct. This check works because if the wrong key or IV is used for decryption, the resulting plaintext is highly unlikely to have valid **PKCS#7** padding.
 
 ## Conclusion
 
-if we have an encrypted file contains the cipher blocks (assuming that these are simply AES-256-CBC encrypted blocks), then the decryption process would generally involve reading those blocks from the file, then decrypting each block, in our case the output hex inside `exam.json` is formatted with 16 bytes in each row cause AES requires blocks of 16 bytes in length (16 bytes plaintext --> 16 bytes cipher block), so that each row of 16 bytes represents one block of ciphertext (hex string) in **AES-256** and if we decrypt a cipher block that will give us a correct padding we can say that we used the correct key.
+if we have an encrypted file contains the cipher blocks (assuming that these are simply AES-256-CBC encrypted blocks), then the decryption process would generally involve reading those blocks from the file, then decrypting each block, in our case the output hex inside `sec.json` is formatted with 16 bytes in each row cause AES requires blocks of 16 bytes in length (16 bytes plaintext --> 16 bytes cipher block), so that each row of 16 bytes represents one block of ciphertext (hex string) in **AES-256** and if we decrypt a cipher block that will give us a correct padding we can say that we used the correct key.

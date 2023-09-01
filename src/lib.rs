@@ -9,10 +9,11 @@
     https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
 
     decompiling using ghidra, binding using .so
-    hardware coding with ram concepts like memory layout and offset (static and const are in segment data and let is on the stack)
+    hardware coding with ram concepts like memory layout, padding and offset (static and const are in segment data and let is on the stack)
     lle (hex editor, bytes, seeds, xor, nor, &, |, include!, liefetime, 
         generic, bytes, hex, base64, raw parts, &mut pointer, unpin, pin
-        and box methods, phantomdata) 
+        generic, impl trait, lifetime box and pin, closure, 
+        Box<dyn Error + Send + Sync + 'static> and box methods, phantomdata) 
 
 */
 
@@ -117,7 +118,30 @@ pub mod utils{
             usize type that contains the size of that pointer in bytes
             inside the stack
         */
-    
+                
+
+        /* 
+            64 bytes of hex string, 8 bytes in each row, 
+            each of type u8 cause the type is inferred to 
+            be &[u8; 64] based on the values you provided, 
+            which are all in the range of a u8 cause every 
+            2 chars in hex is a 1 byte in decimal, in &[i32; 64]
+            each element would be an i32, which takes up 4 bytes. 
+            So the total size of such an array would be 4 bytes 
+            (size of i32) * 64 (number of elements) = 256 bytes.
+        */
+        let bytes = &[
+            0xdc, 0x4d, 0xc2, 0x64, 0xa9, 0xfe, 0xf1, 0x7a,
+            0x3f, 0x25, 0x34, 0x49, 0xcf, 0x8c, 0x39, 0x7a,
+            0xb6, 0xf1, 0x6f, 0xb3, 0xd6, 0x3d, 0x86, 0x94,
+            0x0b, 0x55, 0x86, 0x82, 0x3d, 0xfd, 0x02, 0xae,
+            0x3b, 0x46, 0x1b, 0xb4, 0x33, 0x6b, 0x5e, 0xcb,
+            0xae, 0xfd, 0x66, 0x27, 0xaa, 0x92, 0x2e, 0xfc,
+            0x04, 0x8f, 0xec, 0x0c, 0x88, 0x1c, 0x10, 0xc4,
+            0xc9, 0x42, 0x8f, 0xca, 0x69, 0xc1, 0x32, 0xa2,
+        ];
+
+                
         struct Object{
             a: u8, //// we can fill this in a hex form
             b: u16, //// we can fill this in a hex form
@@ -170,6 +194,23 @@ pub mod utils{
         println!("a: {}", a_off as usize - base);
         println!("b: {}", b_off as usize - base);
         println!("c: {}", c_off as usize - base);
+
+        /* 
+            every index is the place of an element inside the ram which has 1 byte size which is taken by that element
+            in our case the first element takes 2 bytes thus the index 0 won't return 3 
+            cause place 0 and 1 inside the ram each takes 1 byte and the size of the
+            first element is two bytes thus &hello[0..2] which is index 0 and 1 both returns 3 
+            and we can't have string indices in rust due to this reason!
+
+            we don't have string indices instead we have to access it using a range like [0..2] which gives us the first byte of the string
+            because string[1] means that returning the first char of the string that is 1 byte but if we have a utf16 string the first char 
+            is 2 bytes thus string[1] can't return the first char since it thinks that the every char of string is 1 byte hence rust doesn't
+            allow us to this in the first place because String will be coerced into slices or &str in compile time which we don't know where 
+            it will be placed which is either in heap, binary or stack thus the size it's unknown and because of this rust compiler can't know
+            the exact size of string and it's type in first place 
+        */
+        let hello = "Здравствуйте";
+        let s = &hello[0..2];
 
 
         /*
