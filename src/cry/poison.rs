@@ -256,12 +256,14 @@ pub mod aespaddingattack{
             
             for bidx in (BLOCKSIZE-1..0).rev(){    
 
-                /* decrypt C2 and xor it with the iv */
+                /* send C1' + C2 for decryption */
+                c1_bytes_randomly.to_vec().extend_from_slice(&c2_bytes);
+                let final_hex = hex::encode(&c1_bytes_randomly);
 
                 let shell_command = Command::new("./decry.sh")
                     .current_dir("src/cry")
-                    .arg(c2_hex.as_str())
-                    .arg(c1_hex.clone())
+                    .arg(final_hex.as_str())
+                    .arg(c1_hex.clone()) /* iv */
                     .arg(hex_key.clone())
                     .output()
                     .unwrap();
