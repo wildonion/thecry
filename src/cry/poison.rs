@@ -164,15 +164,8 @@ pub mod aespaddingattack{
         
         // --------------------------------------------------------------------------------
         // https://crypto.stackexchange.com/questions/72658/how-do-i-detect-a-failed-aes-256-decryption-programmatically/79948#79948
-        /*  
-
-            imagine the ciphertext for the last block is 5307f7afffa3798f386e7c6c144c6a9c, 
-            and the ciphertext for the previous block is 3b2364d1d04a35c8081bbc6fdeacbd86. 
-            this is equivalent to decrypting one block of ciphertext 5307f7afffa3798f386e7c6c144c6a9c, 
-            using an iv of 3b2364d1d04a35c8081bbc6fdeacbd86, also aes requires the length 
-            of each cipherblock to be 16 bytes also decrypting the first block requires the 
-            iv since the plaintext of the first cipherblock is XORed with the iv 
-        */
+        // https://github.com/flast101/padding-oracle-attack-explained
+        // https://github.com/mpgn/Padding-oracle-attack
 
         println!("current dir {}", std::env::current_dir().unwrap().display());
         let mut enc_file = std::fs::File::open("src/cry/sec.json").unwrap();
@@ -226,20 +219,37 @@ pub mod aespaddingattack{
                 underlying data is a mutable pointer like &mut [u8] or &mut Vec<u8>
                 cause slices are behind pointer by default thus to mutate them 
                 we must have a mutable pointer to them
+
+                I2 represents the "intermediate state" of the decryption for 
+                    the second block of ciphertext. It is the state after running 
+                    just the block cipher decryption but before the XOR with the 
+                    preceding ciphertext block (or IV in the case of the first block).
+                C1 represents the ciphertext block after the first block,  
+                    in CBC mode, each block of plaintext is XORed with the 
+                    previous ciphertext block before being encrypted, the 
+                    very first block is XORed with an Initialization Vector (IV)
+                C1' is a manipulated version of a ciphertext block, created randomly.
+                C2 is the real ciphertext block that the attacker wants to decipher.
+                C1' + C2 is just these blocks concatenated, which will be decrypted by the server.
+                P2 represents the plaintext of the second block
+                P2' is the block we're trying to fill its byte if the padding was 
+                    correct to find the I2
+                 
             */
 
             let c1_hex = String::from("b7dbc950533d55faab8cf88561600cb3");
             let mut c1_bytes_vec = hex::decode(c1_hex.clone()).unwrap();
-            let c1_bytes = c1_bytes_vec.as_mut_slice(); /* creating a longer lifetime by converting the vector into mutable slice */
+            let c1_bytes_real = c1_bytes_vec.as_mut_slice(); /* creating a longer lifetime by converting the vector into mutable slice */
             
             let c1_chars = &mut constants::gen_random_chars((BLOCKSIZE-2) as u32); /* 0 up to 14th bytes are random */
-            let c1_bytes = unsafe{ c1_chars.as_bytes_mut() }; /* accessing mutable bytes of string is unsafe */
-            let c1_random_hex = hex::encode(&c1_bytes);
+            let c1_bytes_randomly = unsafe{ c1_chars.as_bytes_mut() }; /* accessing mutable bytes of string is unsafe */
+            let c1_random_hex = hex::encode(&c1_bytes_randomly);
 
             let hex_key = hex_key.clone();
             let mut pbyte = 0x00;
-            c1_bytes[BLOCKSIZE-1] = pbyte; /* setting the 15th index to 0x00 */
-            let pblocks = &mut [0u8; 16]; /* pblocks is a mutable pointer to its underlying data which is [0u8; 16] */
+            c1_bytes_randomly[BLOCKSIZE-1] = pbyte; /* setting the 15th index to 0x00 */
+            let pblocks = &mut [0u8; 16]; /* pblocks is a mutable pointer to its underlying data which is [0u8; 16] which is the acutal plaintext bytes */
+            let iblocks = &mut [0u8; 16]; /* pblocks is a mutable pointer to its underlying data which is [0u8; 16] which is the intermediate blocks */
             
             /* this is a cipherblock inside the encrypted file */
             let c2_hex = String::from("5814cbbccd968e0d2a72baf30bb06c70");
@@ -275,18 +285,33 @@ pub mod aespaddingattack{
                             must be 0x01 because the last byte of plaintext is
                             padded correctly and since it's only 1 byte we set the last byte
                             of plaintext to 0x01
+
+                            --------------
+                            I2 = C1' ˆ P2' 
+                            P2 = C1 ˆ I2
+                            --------------
+
+                            EXAMPLE FOR 15th BYTE
+                                I2     = C1'     ^ P2'
+                                I2[15] = C1'[15] ^ P2'[15]
+                                       = 94      ^ 01
+                                       = 95
+                                
+                                P2[15] = C1[15] ^ I2[15]
+                                       = C1[15] ^ 95
                         */
 
-                        pblocks[bidx] = c1_bytes[bidx] ^ (BLOCKSIZE - bidx) as u8;
+                        iblocks[bidx] = c1_bytes_randomly[bidx] ^ (BLOCKSIZE - bidx) as u8;
+                        pblocks[bidx] = c1_bytes_real[bidx] ^ iblocks[bidx];
 
                         /* set (bidx-2) bytes of the c1 cipherblock to be random bytes */
                         let c1_chars = &mut constants::gen_random_chars((bidx-2) as u32);
                         let new_c1_bytes = unsafe{ c1_chars.as_bytes_mut() };
-                        c1_bytes[0..bidx-2].copy_from_slice(&new_c1_bytes);
+                        c1_bytes_randomly[0..bidx-2].copy_from_slice(&new_c1_bytes);
                         
                         /* and set the bidx-1 to be the 0x00 */
                         pbyte = 0x00;
-                        c1_bytes[bidx-1] = pbyte;
+                        c1_bytes_randomly[bidx-1] = pbyte;
 
                     } else{
                         
@@ -295,7 +320,7 @@ pub mod aespaddingattack{
                     
                         /* add 1 byte to last byte of the c1 cipherblock until we hit the jackpot! */
                         pbyte += 1;
-                        c1_bytes[bidx] = pbyte;
+                        c1_bytes_randomly[bidx] = pbyte;
 
                     }
                     
