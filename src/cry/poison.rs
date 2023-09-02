@@ -209,7 +209,6 @@ pub mod aespaddingattack{
             /* ------------------------------------------------------------- */
             /* 
 
-                decrypting process using ghidra
                     goal: find the key??
                     goal: find the iv??
                     goal: find kdf??
