@@ -240,6 +240,7 @@ pub mod aespaddingattack{
             let mut c1_bytes_vec = hex::decode(c1_hex.clone()).unwrap();
             let c1_bytes_real = c1_bytes_vec.as_mut_slice(); /* creating a longer lifetime by converting the vector into mutable slice */
             
+            /* C1' must be filled up with random bytes */
             let c1_chars = &mut constants::gen_random_chars((BLOCKSIZE-2) as u32); /* 0 up to 14th bytes are random */
             let c1_bytes_randomly = unsafe{ c1_chars.as_bytes_mut() }; /* accessing mutable bytes of string is unsafe */
             let c1_random_hex = hex::encode(&c1_bytes_randomly);
