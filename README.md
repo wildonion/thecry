@@ -29,13 +29,13 @@ cargo run --bin thecry
 ### CBC-Encryption
 
 <p align="center">
-    <img src="https://github.com/wildonion/payma/blob/main/src/cry/CBC_encryption.svg">
+    <img src="https://github.com/wildonion/thecry/blob/main/src/cry/CBC_encryption.svg">
 </p>
 
 ### CBC-Decryption
 
 <p align="center">
-    <img src="https://github.com/wildonion/payma/blob/main/src/cry/CBC_decryption.png">
+    <img src="https://github.com/wildonion/thecry/blob/main/src/cry/CBC_decryption.png">
 </p>
 
 ## PKCS#7 Padding

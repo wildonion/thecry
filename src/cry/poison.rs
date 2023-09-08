@@ -87,6 +87,10 @@ pub mod aespaddingattack{
 
     use std::collections::HashMap;
 
+    pub struct Lock<'d>{
+        pub data: std::rc::Rc<std::cell::RefCell<&'d [u8]>> /* single thread ownership sharing */
+    } 
+
     pub use super::*;
     pub const ITERS: usize = 1000;
     pub const BLOCKSIZE: usize = 16;
@@ -114,7 +118,7 @@ pub mod aespaddingattack{
                 continue;
             }
             
-
+            /* mapping between the ascii byte and its repetition */
             map.entry(block[bidx])
                 .and_modify(|c| *c+=1)
                 .or_insert(1);
@@ -208,11 +212,11 @@ pub mod aespaddingattack{
             /* ------------------- ORACLE PADDING ATTACK ------------------- */
             /* ------------------------------------------------------------- */
             /* 
-
-                    goal: find the key??
-                    goal: find the iv??
-                    goal: find kdf??
-                    goal: find salt??
+                    decompiling using ghidra to find
+                        goal: find the key??
+                        goal: find the iv??
+                        goal: find kdf??
+                        goal: find salt??
 
                 if we want to mutate an slice we have to make sure that its 
                 underlying data is a mutable pointer like &mut [u8] or &mut Vec<u8>
