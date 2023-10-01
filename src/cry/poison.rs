@@ -66,6 +66,8 @@ pub mod wannacry{
 
     /* 
 
+        AES + KDF like sha256 + RSA ECC curves + rng based on the sha256 of seed like mnemonic
+
         ransomewere, steganography and files encryption by encrypting using 
         aes256 cbc with pbkdf2 + sha384 + salt then showing key and iv like:
                     
@@ -167,10 +169,16 @@ pub mod aespaddingattack{
     pub fn thecry(){
         
         // --------------------------------------------------------------------------------
-        // https://crypto.stackexchange.com/questions/72658/how-do-i-detect-a-failed-aes-256-decryption-programmatically/79948#79948
-        // https://github.com/flast101/padding-oracle-attack-explained
-        // https://github.com/mpgn/Padding-oracle-attack
-
+        /* 
+            https://crypto.stackexchange.com/questions/72658/how-do-i-detect-a-failed-aes-256-decryption-programmatically/79948#79948
+            https://github.com/flast101/padding-oracle-attack-explained
+            https://github.com/mpgn/Padding-oracle-attack
+        
+            in hex file of an encrypted AES256 we have rows contain 32 hex chars 
+            which is 16 bytes length so &buffer[0..16] gives us the first row 
+            bytes of hex chars and by encoding it using hex::encode() we'll give 
+            the 32 hex chars of the first row like b7dbc950533d55faab8cf88561600cb3
+        */
         println!("current dir {}", std::env::current_dir().unwrap().display());
         let mut enc_file = std::fs::File::open("src/cry/sec.json").unwrap();
         let mut buffer = Vec::new();

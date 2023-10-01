@@ -20,6 +20,10 @@ brew install libthemis
 cargo run --bin thecry
 ```
 
+## 🚧 WIPs
+
+- look in `lib.rs`
+
 ## 🐍 Mem Poisoning Usage
 
 * compile the onion exploit into the `linux` or `windows` executable
