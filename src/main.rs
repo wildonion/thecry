@@ -11,14 +11,8 @@ use secp256k1::Secp256k1;
 use secp256k1::ecdsa::Signature;
 use secp256k1::{rand::SeedableRng, rand::rngs::StdRng, PublicKey, SecretKey, Message, hashes::sha256};
 use std::io::BufWriter;
-use tiny_keccak::keccak256;
 use std::str::FromStr;
 use std::{fs::OpenOptions, io::BufReader};
-use web3::{
-    transports,
-    types::{Address, TransactionParameters, H256, U256},
-    Web3,
-};
 use themis::keys as themis_keys;
 use themis::secure_message::{SecureSign, SecureVerify};
 use themis::keygen::gen_ec_key_pair;
