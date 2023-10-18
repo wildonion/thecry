@@ -66,16 +66,17 @@ pub mod wannacry{
 
     /* 
 
-        AES + KDF like sha256 + RSA ECC curves + rng based on the sha256 of seed like mnemonic
+        AES256 + KDF like sha256 + RSA ECC curves like algos in wallexerr
+        generate rng based on the sha256 of a seed phrases like mnemonic
 
-        ransomewere, steganography and files encryption by encrypting using 
+        ransomewere, steganography and files encryption to generate unique assets by encrypting using 
         aes256 cbc with pbkdf2 + sha384 + salt then showing key and iv like:
                     
-            openssl aes-256-cbc -a -salt -pbkdf2 -in secrets.txt -out secrets.txt.enc -p
-            openssl aes-256-cbc -d -a -pbkdf2 -in secrets.txt.enc -out secrets.txt.new -p 
+            openssl aes-256-cbc -a -salt -pbkdf2 -in img.png -out img.png.enc -p
+            openssl aes-256-cbc -d -a -pbkdf2 -in img.png.enc -out img.png.new -p 
 
-            openssl aes-256-cbc -md sha384 -in secret.txt -out secrets.txt.enc -p
-            openssl aes-256-cbc -d -nopad -md sha384 -in secrets.txt.enc -p
+            openssl aes-256-cbc -md sha384 -in secret.txt -out img.png.enc -p
+            openssl aes-256-cbc -d -nopad -md sha384 -in img.png.enc -p
 
             gpg --output encrypted.data --symmetric --cipher-algo AES256 un_encrypted.data
             gpg --output un_encrypted.data --decrypt encrypted.data
