@@ -10,7 +10,6 @@
     https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
 
     e2e and file and msg encryption using aes256 bits
-    wallexerr ed25519 for ssh key with kdf methods like bcrypt, argon2 and keccak256
     decompiling using ghidra, binding using .so
     hardware coding with ram concepts like memory layout, padding and offset (static and const are in segment data and let is on the stack)
     lle (hex editor, bytes, seeds, xor, nor, &, |, include!, liefetime, 
