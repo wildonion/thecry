@@ -448,21 +448,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bitcoin-private"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73290177011694f38ec25e165d0387ab7ea749a4b81cd4c80dae5988229f7a57"
-
-[[package]]
-name = "bitcoin_hashes"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d7066118b13d4b20b23645932dfb3a81ce7e29f95726c2036fa33cd7b092501"
-dependencies = [
- "bitcoin-private",
-]
-
-[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -574,11 +559,12 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.79"
+version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
+checksum = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0"
 dependencies = [
  "jobserver",
+ "libc",
 ]
 
 [[package]]
@@ -1155,9 +1141,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.8"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
+checksum = "fe9006bed769170c11f845cf00c7c1e9092aeb3f268e007c3e760ac68008070f"
 dependencies = [
  "cfg-if",
  "libc",
@@ -2201,10 +2187,24 @@ dependencies = [
  "cc",
  "libc",
  "once_cell",
- "spin",
- "untrusted",
+ "spin 0.5.2",
+ "untrusted 0.7.1",
  "web-sys",
  "winapi",
+]
+
+[[package]]
+name = "ring"
+version = "0.17.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "684d5e6e18f669ccebf64a92236bb7db9a34f07be010e3627368182027180866"
+dependencies = [
+ "cc",
+ "getrandom",
+ "libc",
+ "spin 0.9.8",
+ "untrusted 0.9.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -2310,8 +2310,6 @@ version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25996b82292a7a57ed3508f052cfff8640d38d32018784acd714758b43da9c8f"
 dependencies = [
- "bitcoin_hashes",
- "rand",
  "secp256k1-sys 0.8.1",
 ]
 
@@ -2544,6 +2542,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
+name = "spin"
+version = "0.9.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2647,15 +2651,12 @@ dependencies = [
  "once_cell",
  "pretty_env_logger",
  "rand",
- "rand_chacha",
  "rayon",
- "ring",
+ "ring 0.16.20",
  "rust-argon2",
- "secp256k1 0.27.0",
  "serde",
  "serde_json",
  "sha2",
- "themis",
  "tokio",
  "tokio-cron-scheduler",
  "uuid",
@@ -3011,6 +3012,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
+name = "untrusted"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
+
+[[package]]
 name = "url"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3045,16 +3052,16 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "wallexerr"
-version = "0.2.4"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59db0f7828d5d265659fd04581836a418ce6882790555d3748fb8630bfc0e221"
+checksum = "0c4fd625bc2997539f39b0cca7fa931bdecd69917d52451a090116f51f52e1fb"
 dependencies = [
  "base58",
  "base64 0.21.5",
  "chrono",
  "hex",
  "once_cell",
- "ring",
+ "ring 0.17.6",
  "secp256k1 0.28.0",
  "serde",
  "serde_json",

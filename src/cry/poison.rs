@@ -66,9 +66,7 @@ pub mod wannacry{
 
     /* 
 
-        AES256 + KDF like sha256 + RSA ECC curves like algos in wallexerr
-        generate rng based on the sha256 of a seed phrases like mnemonic
-
+        tools: RSA ECC curves in wallexerr, openssl and ring for RSA and AES256 + KDF like sha256 + 
         ransomewere, steganography and files encryption to generate unique assets by encrypting using 
         aes256 cbc with pbkdf2 + sha384 + salt then showing key and iv like:
                     
@@ -158,7 +156,7 @@ pub mod aespaddingattack{
     fn gen_kdf(password: &str) -> Vec<u8>{
 
         // echo -n '03261985' | sha384sum
-
+        use sha2::Digest;
         let mut hasher = sha2::Sha384::new();
         hasher.update(password);
         let pswdsha384: &[u8] = &hasher.finalize();

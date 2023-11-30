@@ -31,20 +31,25 @@ pub fn gen_random_idx(idx: usize) -> usize{
     }
 }
 
-/* 
-    we cannot obtain &'static str from a String because Strings may not live 
-    for the entire life of our program, and that's what &'static lifetime means. 
-    we can only get a slice parameterized by String own lifetime from it, we can 
-    obtain a static str but it involves leaking the memory of the String. this is 
-    not something we should do lightly, by leaking the memory of the String, this 
-    guarantees that the memory will never be freed (thus the leak), therefore, any 
-    references to the inner object can be interpreted as having the 'static lifetime.
-    
-    also here it's ok to return the reference from function since our reference lifetime 
-    is static and is valid for the entire life of the app
-*/
+
+/* converting an slice array of u8 bytes into an array with 32 byte length */
+fn convert_into_u8_32(data: &[u8]) -> Option<[u8; 32]>{
+    data.try_into().ok()
+}
+
 pub fn string_to_static_str(s: String) -> &'static str { 
     /* 
+        we cannot obtain &'static str from a String because Strings may not live 
+        for the entire life of our program, and that's what &'static lifetime means. 
+        we can only get a slice parameterized by String own lifetime from it, we can 
+        obtain a static str but it involves leaking the memory of the String. this is 
+        not something we should do lightly, by leaking the memory of the String, this 
+        guarantees that the memory will never be freed (thus the leak), therefore, any 
+        references to the inner object can be interpreted as having the 'static lifetime.
+        
+        also here it's ok to return the reference from function since our reference lifetime 
+        is static and is valid for the entire life of the app
+
         leaking the memory of the heap data String which allows us to have an 
         unfreed allocation that can be used to define static str using it since
         static means we have static lifetime during the whole lifetime of the app
@@ -57,6 +62,7 @@ pub fn string_to_static_str(s: String) -> &'static str {
         for the remainder of the program. Use this sparingly
     */
     Box::leak(s.into_boxed_str()) 
+
 }
 
 /* 
