@@ -64,9 +64,9 @@ pub mod mem_poisoning{
 
 pub mod wannacry{
 
-    /* 
+    /* e2e and file and msg encryption using aes256 bits
 
-        tools: RSA ECC curves in wallexerr, openssl and ring for RSA and AES256 + KDF like sha256 + 
+        tools: RSA ed25519 ECC curve with aes256 hash in wallexerr, openssl and ring for RSA + KDF like sha256 and keccak256
         ransomewere, steganography and files encryption to generate unique assets by encrypting using 
         aes256 cbc with pbkdf2 + sha384 + salt then showing key and iv like:
                     

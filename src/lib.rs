@@ -9,7 +9,6 @@
     https://github.com/wildonion/cs-concepts
     https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
 
-    e2e and file and msg encryption using aes256 bits
     decompiling using ghidra, binding using .so
     hardware coding with ram concepts like memory layout, padding and offset (static and const are in segment data and let is on the stack)
     lle (hex editor, bytes, seeds, xor, nor, &, |, include!, liefetime, 
