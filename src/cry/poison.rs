@@ -9,6 +9,7 @@ use self::constants::{gen_random_number, gen_random_idx, CHARS};
 use std::process::Command;
 use std::io::Write;
 use std::io::Read;
+use wallexerr::misc::*;
 
 
 /* 
@@ -81,36 +82,64 @@ pub mod wannacry{
     
     */
 
-    use crate::constants;
+    use super::*;
 
-    fn start(){
+    pub mod ecdsa_with_symmetric_signing{
 
-        // ed25519_aes256_test() will sign and hash data using aes256 instead of keccak256 bits
-        // ed25519_test() will sign and hash data using keccak256
-        // note that nonce must be unique per each user or a unique identity
+        pub use super::*;
         
-        let data = String::from("some data in here!");
-        let mut wallet = wallexerr::Wallet::new_ed25519();
-        let mut default_aes256_condif = wallexerr::Aes256Config::default();
-        default_aes256_condif.secret_key = constants::gen_random_chars(64); /*** ---- secret key must be 64 bytes or 512 bits */
-        default_aes256_condif.nonce = constants::gen_random_chars(16); /*** ---- secret key must be 16 bytes or 128 bits */
-        default_aes256_condif.data = data.as_bytes().to_vec();
+        pub fn ed25519_aes256_signing(data: &str, mut wallet: Wallet) -> String{
+    
+            // ed25519_aes256_test() will sign and hash data using aes256 instead of keccak256 bits
+            // ed25519_test() will sign and hash data using keccak256
+            // note that nonce must be unique per each user or a unique identity
+            
+            let mut default_aes256_config = Aes256Config::default();
+            default_aes256_config.secret_key = constants::gen_random_chars(64); /*** ---- secret key must be 64 bytes or 512 bits */
+            default_aes256_config.nonce = constants::gen_random_chars(16); /*** ---- secret key must be 16 bytes or 128 bits */
+            default_aes256_config.data = data.as_bytes().to_vec();
+    
+            let encrypted_data = wallet.self_generate_aes256_from(default_aes256_config.clone());        
+            default_aes256_config.data = encrypted_data.clone(); /* update data field with encrypted form of raw data */
+            let decrypted_data = wallet.self_generate_data_from_aes256(default_aes256_config.clone());
+            
+            let raw_data = std::str::from_utf8(&decrypted_data).unwrap();
+            println!("aes256 decrypted data :::: {:?}", raw_data);
+            println!("default_aes256_config.secret_key :::: {:?}", default_aes256_config.secret_key);
+            println!("default_aes256_config.nonce :::: {:?}", default_aes256_config.nonce);
+    
+            let edprvkey = wallet.ed25519_secret_key.clone().unwrap();
+            let base58_sig = wallet.self_ed25519_aes256_sign(
+                &edprvkey, 
+                default_aes256_config
+            );
+            
+            let is_verified = wallet.self_verify_ed25519_signature(
+                &base58_sig.clone().unwrap(), 
+                &encrypted_data, 
+                &wallet.clone().ed25519_public_key.unwrap()
+            );
+            
+            base58_sig.unwrap()
+    
+        }
+    
+        pub fn secure_cell_signing(data: &str, mut wallet: Wallet){
+    
+            let mut default_secure_cell_config = SecureCellConfig::default();
+            default_secure_cell_config.secret_key = constants::gen_random_chars(64); /*** ---- secret key must be 64 bytes or 512 bits */
+            default_secure_cell_config.data = data.as_bytes().to_vec();
+    
+            let encrypted_data = wallet.self_secure_cell_encrypt(default_secure_cell_config.clone()).unwrap();
+            let hex_encrypted_data = hex::encode(encrypted_data.clone());
 
-        let encrypted_data = wallet.self_generate_aes256_from(default_aes256_condif.clone());        
-        default_aes256_condif.data = encrypted_data.clone(); /* update data field with encrypted form of raw data */
-        let decrypted_data = wallet.self_generate_data_from_aes256(default_aes256_condif.clone());
+            default_secure_cell_config.data = encrypted_data;
+    
+            let decrypted_data = wallet.self_secure_cell_decrypt(default_secure_cell_config.clone()).unwrap();
+            let raw_data = std::str::from_utf8(&decrypted_data).unwrap();
+
+        }
         
-        let raw_data = std::str::from_utf8(&decrypted_data).unwrap();
-        println!("aes256 decrypted data :::: {:?}", raw_data);
-        println!("default_aes256_condif.secret_key :::: {:?}", default_aes256_condif.secret_key);
-        println!("default_aes256_condif.nonce :::: {:?}", default_aes256_condif.nonce);
-
-        let edprvkey = wallet.ed25519_secret_key.clone().unwrap();
-        let base58_sig = wallet.self_ed25519_aes256_sign(
-            &edprvkey, 
-            default_aes256_condif
-        );
-
     }
 
 }
