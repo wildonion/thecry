@@ -80,6 +80,35 @@ pub mod wannacry{
             gpg --output un_encrypted.data --decrypt encrypted.data
     
     */
+
+    use crate::constants;
+
+    fn start(){
+
+        let data = String::from("some data in here!");
+        let mut wallet = wallexerr::Wallet::new_ed25519();
+        let mut default_aes256_condif = wallexerr::Aes256Config::default();
+        default_aes256_condif.secret_key = constants::gen_random_chars(64); /*** ---- secret key must be 64 bytes or 512 bits */
+        default_aes256_condif.nonce = constants::gen_random_chars(16); /*** ---- secret key must be 16 bytes or 128 bits */
+        default_aes256_condif.data = data.as_bytes().to_vec();
+
+        let encrypted_data = wallet.self_generate_aes256_from(default_aes256_condif.clone());        
+        default_aes256_condif.data = encrypted_data.clone(); /* update data field with encrypted form of raw data */
+        let decrypted_data = wallet.self_generate_data_from_aes256(default_aes256_condif.clone());
+        
+        let raw_data = std::str::from_utf8(&decrypted_data).unwrap();
+        println!("aes256 decrypted data :::: {:?}", raw_data);
+        println!("default_aes256_condif.secret_key :::: {:?}", default_aes256_condif.secret_key);
+        println!("default_aes256_condif.nonce :::: {:?}", default_aes256_condif.nonce);
+
+        let edprvkey = wallet.ed25519_secret_key.clone().unwrap();
+        let base58_sig = wallet.self_ed25519_aes256_sign(
+            &edprvkey, 
+            default_aes256_condif
+        );
+
+    }
+
 }
 
 
