@@ -85,6 +85,10 @@ pub mod wannacry{
 
     fn start(){
 
+        // ed25519_aes256_test() will sign and hash data using aes256 instead of keccak256 bits
+        // ed25519_test() will sign and hash data using keccak256
+        // note that nonce must be unique per each user or a unique identity
+        
         let data = String::from("some data in here!");
         let mut wallet = wallexerr::Wallet::new_ed25519();
         let mut default_aes256_condif = wallexerr::Aes256Config::default();
