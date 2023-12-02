@@ -7,6 +7,7 @@ use ring::signature::Ed25519KeyPair;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use ring::{signature::KeyPair, pkcs8::Document};
+use wallexerr::misc::Wallet;
 use std::io::BufWriter;
 use std::str::FromStr;
 use std::{fs::OpenOptions, io::BufReader};
@@ -31,7 +32,12 @@ pub mod cry;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
 
-    cry::poison::aespaddingattack::thecry();
+    // cry::poison::aespaddingattack::thecry();
+
+    let data = String::from("wildonion here guys");
+    let mut wallet = Wallet::new_ed25519();
+    let signature = cry::poison::wannacry::sign_with_ed25519(&data, wallet);
+    println!("base58 ed25519 signature >> {:?}", signature);
 
     Ok(())     
 

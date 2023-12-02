@@ -3137,9 +3137,9 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "wallexerr"
-version = "0.2.8"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5585aed1f80de31d142197dbe3fa6bc6dcfbd68725819763223754b4cdb611f5"
+checksum = "d8f0569a60a9a0ffeb1d46130d64b84166d19f09d2c1daa3682545e6ce26978a"
 dependencies = [
  "aes256ctr_poly1305aes",
  "base58",

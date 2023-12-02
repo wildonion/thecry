@@ -1,7 +1,6 @@
 
 ## 🎯 Run
 
-
 > first clone the repo then install the followings (refer to https://docs.cossacklabs.com/themis/installation/installation-from-packages/ if you don't want to build themis from source):
 
 ```bash
