@@ -188,10 +188,10 @@ pub mod aespaddingattack{
         
             AES256 bits is a 32 bytes utf8 encoding which contains 32 hex chars 
             in its each block cipher so in hex file of an encrypted AES256 we have 
-            rows contain 32 hex chars which is 16 bytes length so &buffer[0..16] 
-            gives us the first row bytes of hex chars and by encoding it using 
-            hex::encode() we'll take the 32 hex chars of the first row like 
-            b7dbc950533d55faab8cf88561600cb3
+            rows contain 32 hex chars which is 16 bytes length or 128 bits so 
+            &buffer[0..16] gives us the first row bytes of hex chars and by encoding 
+            it using hex::encode() we'll take the 32 hex chars of the first row 
+            like: b7dbc950533d55faab8cf88561600cb3
         */
         println!("current dir {}", std::env::current_dir().unwrap().display());
         let mut enc_file = std::fs::File::open("src/cry/sec.json").unwrap();
