@@ -36,8 +36,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>
 
     let data = String::from("wildonion here guys");
     let mut wallet = Wallet::new_ed25519();
-    let signature = cry::poison::wannacry::sign_with_ed25519(&data, wallet);
+    let signature = cry::poison::wannacry::ed25519_with_aes_signing(&data, wallet);
     println!("base58 ed25519 signature >> {:?}", signature);
+    
+    //----------------------------------------------------------------------------------
+    //---- file encryption using ed25519 wallet with aes256 themis secure cell signing
+    //----------------------------------------------------------------------------------
+    let mut encrypted = cry::poison::wannacry::encrypt_file("secret.txt").await;
+    let decrypted = cry::poison::wannacry::decrypt_file("secret.txt.dec", &mut encrypted.1).await;
+
 
     Ok(())     
 

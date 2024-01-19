@@ -73,10 +73,13 @@ pub mod eddsa_with_symmetric_signing{
 
     }
 
-
+    //------------------------------
+    //----------- themis -----------
+    //------------------------------
     pub fn ed25519_secure_cell_signing(data: &str, mut wallet: Wallet) -> String{
 
         let mut default_secure_cell_config = &mut SecureCellConfig::default();
+        // following secret key is the sha3 keccak256 hash of random chars
         default_secure_cell_config.secret_key = {
             hex::encode(
                 wallet.self_generate_keccak256_hash_from(

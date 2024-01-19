@@ -678,6 +678,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21a53c0a4d288377e7415b53dcfc3c04da5cdc2cc95c8d5ac178b58f0b861ad6"
 
 [[package]]
+name = "constant_time_eq"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7144d30dcf0fafbce74250a3963025d8d52177934239851c917d29f1df280c2"
+
+[[package]]
 name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2305,6 +2311,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-argon2"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d9848531d60c9cbbcf9d166c885316c24bc0e2a9d3eba0956bb6cbbd79bc6e8"
+dependencies = [
+ "base64 0.21.5",
+ "blake2b_simd",
+ "constant_time_eq 0.3.0",
+]
+
+[[package]]
 name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2728,7 +2745,7 @@ dependencies = [
  "rand",
  "rayon",
  "ring 0.16.20",
- "rust-argon2",
+ "rust-argon2 1.0.0",
  "serde",
  "serde_json",
  "sha2",
@@ -3137,9 +3154,9 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "wallexerr"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8f0569a60a9a0ffeb1d46130d64b84166d19f09d2c1daa3682545e6ce26978a"
+checksum = "8bdde3d18edb35070c470e7d563a084ccec084305faf6ddd865a77a5082578d3"
 dependencies = [
  "aes256ctr_poly1305aes",
  "base58",
@@ -3148,6 +3165,7 @@ dependencies = [
  "hex",
  "once_cell",
  "ring 0.17.6",
+ "rust-argon2 2.1.0",
  "secp256k1 0.28.0",
  "serde",
  "serde_json",

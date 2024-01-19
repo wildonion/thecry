@@ -82,15 +82,59 @@ pub mod wannacry{
     
     */
 
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use super::*;
 
     
-    pub fn sign_with_ed25519(data: &str, mut wallet: Wallet) -> String{
+    pub fn ed25519_with_aes_signing(data: &str, mut wallet: Wallet) -> String{
+        
         let aes256_signature = cry::eddsa_with_symmetric_signing::ed25519_aes256_signing(data, wallet.clone());
         let secure_cell_signature = cry::eddsa_with_symmetric_signing::ed25519_secure_cell_signing(data, wallet.clone());
         let keccak256_signature = cry::eddsa_with_keccak256_signing::ed25519_keccak256_signing(data, wallet.clone());
 
         secure_cell_signature
+    }
+
+    pub async fn encrypt_file(fpath: &str) -> (Vec<u8>, SecureCellConfig){
+
+        let file = tokio::fs::File::open(fpath).await;
+
+        let mut buffer = vec![];
+        file.unwrap().read_to_end(&mut buffer).await; // await on it to fill the buffer
+
+        let mut wallet = wallexerr::misc::Wallet::new_ed25519();
+        let mut default_secure_cell_config = &mut SecureCellConfig::default();
+        default_secure_cell_config.secret_key = {
+            hex::encode(
+                wallet.self_generate_keccak256_hash_from(
+                    &constants::gen_random_chars(64)
+                )
+            )
+        };
+        default_secure_cell_config.data = buffer;
+
+        let encrypted_data = wallet.self_secure_cell_encrypt(default_secure_cell_config).unwrap();
+        default_secure_cell_config.data = encrypted_data.clone(); //*** important part */
+
+        let enc_file_path = format!("{}.enc", fpath);
+        let file = tokio::fs::File::create(&enc_file_path).await;
+        file.unwrap().write_all(&encrypted_data).await;
+
+        (encrypted_data, default_secure_cell_config.to_owned())
+
+    }
+
+    pub async fn decrypt_file(decpath: &str, default_secure_cell_config: &mut SecureCellConfig) -> Vec<u8>{
+
+        let file = tokio::fs::File::create(decpath).await;
+
+        let mut wallet = wallexerr::misc::Wallet::new_ed25519();
+        let decrypted_data = wallet.self_secure_cell_decrypt(default_secure_cell_config).unwrap();
+
+        file.unwrap().write_all(&decrypted_data).await;
+
+        decrypted_data
+
     }
 
 }
