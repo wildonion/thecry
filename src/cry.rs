@@ -58,6 +58,7 @@ pub mod eddsa_with_symmetric_signing{
                 let deserialized_data = std::str::from_utf8(&dec).unwrap();
                 if deserialized_data == data{
 
+                    wallet.self_save_to_json("ed25519-aes256");
                     println!("✅ got same data");
                     return base58_sig.unwrap();
 
@@ -116,6 +117,7 @@ pub mod eddsa_with_symmetric_signing{
                 let deserialized_data = std::str::from_utf8(&dec).unwrap();
                 if deserialized_data == data{
 
+                    wallet.self_save_to_json("ed25519-secure_cell");
                     println!("✅ got same data");
                     return base58_sig.unwrap();
 
@@ -166,7 +168,8 @@ pub mod eddsa_with_keccak256_signing{
         
         match is_verified{
             Ok(is_verified) => {
-                
+
+                wallet.self_save_to_json("ed25519-keccak256");
                 return base58_sig.unwrap();
 
             },
