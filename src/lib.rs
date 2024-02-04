@@ -9,13 +9,6 @@
     https://github.com/wildonion/cs-concepts
     https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
 
-    decompiling using ghidra, binding using .so
-    hardware coding with ram concepts like memory layout, padding and offset (static and const are in segment data and let is on the stack)
-    lle (hex editor, bytes, seeds, xor, nor, &, |, include!, liefetime, 
-        generic, bytes, hex, base64, raw parts, &mut pointer, unpin, pin
-        generic, impl trait, lifetime box and pin, closure, 
-        Box<dyn Error + Send + Sync + 'static> and box methods, phantomdata) 
-
 */
 
 use serde::{Serialize, Deserialize};
