@@ -17,6 +17,7 @@ use crypter;
 pub mod constants;
 pub mod cry;
 
+pub mod zkp;
 
 /*
     the error part of the result type is a pointer to a std Error trait 

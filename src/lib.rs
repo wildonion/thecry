@@ -1,15 +1,4 @@
 
-/*
-
-
-    zero copy        ::::: https://github.com/wildonion/uniXerr/blob/a30a9f02b02ec7980e03eb8e31049890930d9238/infra/valhalla/coiniXerr/src/schemas.rs#L1621C6-L1621C6
-    data collision   ::::: https://github.com/wildonion/uniXerr/blob/a30a9f02b02ec7980e03eb8e31049890930d9238/infra/valhalla/coiniXerr/src/utils.rs#L640 
-    all ltgs in rust ::::: https://github.com/wildonion/rusty/blob/main/src/retbyref.rs#L17
-    https://crates.io/crates/pyo3
-    https://github.com/wildonion/cs-concepts
-    https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
-
-*/
 
 use serde::{Serialize, Deserialize};
 use std::fmt::Write;
@@ -272,23 +261,4 @@ pub mod utils{
     
     }
     
-}
-
-
-pub mod zkp{
-
-    pub use super::*;
-
-    pub struct ZkpError;
-    pub struct Verifier;
-    pub struct Prover;
-
-    pub async fn auth() -> Result<(), ZkpError>{
-
-        Ok(())
-    }
-
-    // https://noir-lang.org/index.html
-    // https://github.com/rust-cc/awesome-cryptography-rust#zero-knowledge-proofs
-
 }
