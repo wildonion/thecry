@@ -150,6 +150,54 @@ pub mod eddsa_with_symmetric_signing{
 pub mod eddsa_with_keccak256_signing{
 
     pub use super::*;
+
+    pub fn ed25519_encrypt_tcp_packet_with_aes256_secure_cell(mut wallet: Wallet, aes256_config: &mut SecureCellConfig) -> String{
+
+        let raw_data_vec = aes256_config.clone().data;
+        let raw_data_str = std::str::from_utf8(&raw_data_vec).unwrap();
+
+        let edprvkey = wallet.ed25519_secret_key.clone().unwrap();
+        let base58_sig = wallet.self_ed25519_secure_cell_sign(
+            &edprvkey, 
+            aes256_config
+        );
+
+        /* aes256_config.data now contains the aes256 hash of the raw data */
+        let hash_of_data = aes256_config.clone().data;
+        println!("secure cell aes256 encrypted data :::: {:?}", hex::encode(&hash_of_data));
+        println!("signature :::: {:?}", base58_sig.clone());
+        
+        let is_verified = wallet.self_verify_ed25519_signature(
+            &base58_sig.clone().unwrap(), 
+            &hash_of_data, 
+            &wallet.clone().ed25519_public_key.unwrap()
+        );
+        
+        match is_verified{
+            Ok(is_verified) => {
+
+                aes256_config.data = hash_of_data.clone(); /* update data field with encrypted form of raw data */
+                let dec = wallet.self_secure_cell_decrypt(aes256_config).unwrap();
+                println!("aes256 decrypted data :::: {:?}", std::str::from_utf8(&dec));
+
+                let deserialized_data = std::str::from_utf8(&dec).unwrap();
+                if deserialized_data == raw_data_str{
+
+                    wallet.self_save_to_json("ed25519-secure_cell");
+                    println!("✅ got same data");
+                    return base58_sig.unwrap();
+
+                } else{
+
+                    eprintln!("🔴 invalid data");
+                    return String::from("");
+                }
+
+            },
+            Err(e) => return String::from("")
+        }
+
+    }
     
     pub fn ed25519_keccak256_signing(data: &str, mut wallet: Wallet) -> String{
 
