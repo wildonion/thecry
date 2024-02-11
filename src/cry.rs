@@ -151,7 +151,7 @@ pub mod eddsa_with_keccak256_signing{
 
     pub use super::*;
 
-    pub fn ed25519_encrypt_tcp_packet_with_aes256_secure_cell(mut wallet: Wallet, aes256_config: &mut SecureCellConfig) -> String{
+    pub fn ed25519_encryp_and_sign_tcp_packet_with_aes256_secure_cell(mut wallet: Wallet, aes256_config: &mut SecureCellConfig) -> String{
 
         let raw_data_vec = aes256_config.clone().data;
         let raw_data_str = std::str::from_utf8(&raw_data_vec).unwrap();
@@ -195,6 +195,37 @@ pub mod eddsa_with_keccak256_signing{
 
             },
             Err(e) => return String::from("")
+        }
+
+    }
+
+    pub fn ed25519_decrypt_and_verify_tcp_packet_with_aes256_secure_cell(mut wallet: Wallet, base58_sig: &str, aes256_config: &mut SecureCellConfig) -> (bool, String){
+
+        /* aes256_config.data now contains the aes256 hash of the raw data */
+        let hash_of_data = aes256_config.clone().data;
+        println!("secure cell aes256 encrypted data :::: {:?}", hex::encode(&hash_of_data));
+        println!("signature :::: {:?}", base58_sig);
+        
+        let is_verified = wallet.self_verify_ed25519_signature(
+            &base58_sig, 
+            &hash_of_data, 
+            &wallet.clone().ed25519_public_key.unwrap()
+        );
+        
+        match is_verified{
+            Ok(is_verified) => {
+
+                aes256_config.data = hash_of_data.clone(); /* update data field with encrypted form of raw data */
+                let dec = wallet.self_secure_cell_decrypt(aes256_config).unwrap();
+                println!("aes256 decrypted data :::: {:?}", std::str::from_utf8(&dec)); // dec is not the vector of hex it's the raw vector of data so we can map it to str like this
+
+                let deserialized_data = std::str::from_utf8(&dec).unwrap();
+                wallet.self_save_to_json("ed25519-secure_cell");
+                println!("✅ aes256 hash is valid");
+                return (true, deserialized_data.to_string());
+
+            },
+            Err(e) => (false, String::from(""))
         }
 
     }
