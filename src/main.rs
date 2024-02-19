@@ -20,15 +20,20 @@ pub mod cry;
 pub mod zkp;
 
 /*
-    the error part of the result type is a pointer to a std Error trait 
-    bounded to Send, Sync and 'static lifetime to be shareable between
-    threads, the reason is actually we don't know the type that will cause
-    the error at runtime and in order to handle the error for that type
-    we must bound the type to this trait at runtime which can handle all
-    the possible errors of the type, also since traits are not fix sized 
-    and they're on the heap we must put them behind a pointer like &dyn Trait
-    with a valid lifetime or inside the Box like Box<dyn Trait> which has 
-    its own valid lifetime.
+    if we want to use Result<(), impl std::error::Error + Send + Sync + 'static>
+    as the return type of the error part, the exact error type instance must be 
+    sepecified also the Error trait must be implemented for the error type (impl 
+    Error for ErrorType{}) since we're implementing the Error trait for the error 
+    type in return type which insists that the instance of the type implements the 
+    Error trait. by returning a boxed error trait we're returning the Error trait 
+    as a heap object behind a valid pointer which handles all error type at runtime, 
+    this is the solution to return traits as an object cause we don't know what type 
+    causes the error at runtiem and is the implementor of the Error trait which 
+    forces us to return the trait as the error itself and since traits are dynamically
+    sized we can't treat them as a typed object directly we must put them behind 
+    pointer like &'valid dyn Trait or box them to send them on the heap, also by 
+    bounding the Error trait to Send + Sync + 'static we'll make it sefable, sendable 
+    and shareable to move it between different scopes and threads.
 */
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
