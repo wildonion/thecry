@@ -243,21 +243,34 @@ pub mod utils{
 
     fn serding(){
     
-        #[derive(Serialize, Deserialize, Clone)]
-        struct HexStringEx{
-            pub name: String,
-        }
-        let mut instance = HexStringEx{name: "wildonion".to_string()};
-    
-        let string = serde_json::to_string_pretty(&instance).unwrap();
-        let bytes = string.as_bytes();
-        let hex_string = hex::encode(bytes);
-    
-        let rev_bytes = hex::decode(hex_string).unwrap();
-        let rev_instance = serde_json::from_slice::<HexStringEx>(&rev_bytes).unwrap();
-    
-        let instance_name_encoded = rev_instance.name.as_bytes();
-        let instance_name_decoded = std::str::from_utf8(instance_name_encoded).unwrap().to_string();
+        #[derive(Serialize, Deserialize, Debug)]
+        struct DataBucket{data: String, age: i32}
+        let instance = DataBucket{data: String::from("wildonion"), age: 27};
+        ///// encoding
+        let instance_bytes = serde_json::to_vec(&instance);
+        let instance_json_string = serde_json::to_string_pretty(&instance);
+        let instance_str = serde_json::to_string(&instance);
+        let isntance_json_value = serde_json::to_value(&instance);
+        let instance_json_bytes = serde_json::to_vec_pretty(&instance);
+        let instance_hex = hex::encode(&instance_bytes.as_ref().unwrap());
+        ///// decoding
+        let instance_from_bytes = serde_json::from_slice::<DataBucket>(&instance_bytes.as_ref().unwrap());
+        let instance_from_json_string = serde_json::from_str::<DataBucket>(&instance_json_string.unwrap());
+        let instance_from_str = serde_json::from_str::<DataBucket>(&instance_str.unwrap());
+        let isntance_from_json_value = serde_json::from_value::<DataBucket>(isntance_json_value.unwrap());
+        let instance_from_hex = hex::decode(instance_hex.clone()).unwrap();
+        let instance_from_hex_vector_using_serde = serde_json::from_slice::<DataBucket>(&instance_from_hex);
+        let instance_from_hex_vector_using_stdstr = std::str::from_utf8(&instance_from_hex);
+        let instance_from_vector_using_stdstr = std::str::from_utf8(&instance_bytes.as_ref().unwrap());
+        
+        println!(">>>>>>> instance_hex {:?}", instance_hex);
+        println!(">>>>>>> instance_from_bytes {:?}", instance_from_bytes.as_ref().unwrap());
+        println!(">>>>>>> instance_from_json_string {:?}", instance_from_json_string.unwrap());
+        println!(">>>>>>> instance_from_str {:?}", instance_from_str.unwrap());
+        println!(">>>>>>> isntance_from_json_value {:?}", isntance_from_json_value.unwrap());
+        println!(">>>>>>> instance_from_hex_vector_using_serde {:?}", instance_from_hex_vector_using_serde.unwrap());
+        println!(">>>>>>> instance_from_vector_using_stdstr {:?}", instance_from_vector_using_stdstr.unwrap());
+        println!(">>>>>>> instance_from_hex_vector_using_stdstr {:?}", instance_from_hex_vector_using_stdstr.unwrap());
     
     }
     
