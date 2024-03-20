@@ -19,5 +19,6 @@ pub mod zkp{
 
     // https://noir-lang.org/index.html
     // https://github.com/rust-cc/awesome-cryptography-rust#zero-knowledge-proofs
+    // https://www.cossacklabs.com/blog/zero-knowledge-protocols-without-magic/ => themis zkp
 
 }
