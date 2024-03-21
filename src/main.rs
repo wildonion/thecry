@@ -17,8 +17,6 @@ use crypter;
 pub mod constants;
 pub mod cry;
 
-pub mod zkp;
-
 /*
     if we want to use Result<(), impl std::error::Error + Send + Sync + 'static>
     as the return type of the error part, the exact error type instance must be 
