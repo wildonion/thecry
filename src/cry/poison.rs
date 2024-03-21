@@ -1,19 +1,6 @@
 
 
 
-/*
-
-
-    zero copy        ::::: https://github.com/wildonion/uniXerr/blob/a30a9f02b02ec7980e03eb8e31049890930d9238/infra/valhalla/coiniXerr/src/schemas.rs#L1621C6-L1621C6
-    data collision   ::::: https://github.com/wildonion/uniXerr/blob/a30a9f02b02ec7980e03eb8e31049890930d9238/infra/valhalla/coiniXerr/src/utils.rs#L640 
-    all ltgs in rust ::::: https://github.com/wildonion/rusty/blob/main/src/retbyref.rs#L17
-    https://crates.io/crates/pyo3
-    https://github.com/wildonion/gvm/
-    https://github.com/wildonion/cs-concepts
-    https://github.com/mozilla/cbindgen -> generate c bindings and .so from rust code using unsafe coding
-
-*/
-
 
 use crate::*;
 use self::constants::{gen_random_number, gen_random_idx, CHARS};
@@ -287,7 +274,7 @@ pub mod aespaddingattack{
             let secret = gen_kdf(pass);
 
             /* we can use the first 32 bytes as the key and the rest as the iv which is 16 bytes */
-            let key = &secret.as_slice()[..32];
+            let key = &secret.as_slice()[..32]; // 0 up to 31
             let iv = &secret.as_slice()[32..];
             let hex_key = hex::encode(key);
             let hex_iv = hex::encode(iv);
